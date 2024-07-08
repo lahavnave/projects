@@ -10,7 +10,7 @@ import java.util.function.Function;
 import static src.drawingHelper.Colors.*;
 
 /**
- * A class that has access to its own canvas and all the drawable classes
+ * A class that has access to a canvas and all the drawable classes
  */
 public abstract class drawer {
 
@@ -44,22 +44,18 @@ public abstract class drawer {
 
     public static final Thread mouseUpdater = new Thread(() -> {
         while (!Thread.currentThread().isInterrupted()){
-            refreshMouse();
-        }
-    });
-
-    public static void refreshMouse(){
-        for (var e : canvas.getEventScanner()) {
-            if (e instanceof MouseMoveEvent a) {
-                mouse.x = a.getX();
-                mouse.y = a.getY();
-            } else if (e instanceof MouseDownEvent){
-                mouseIsPressed = true;
-            } else if (e instanceof MouseUpEvent){
-                mouseIsPressed = false;
+            for (var e : canvas.getEventScanner()) {
+                if (e instanceof MouseMoveEvent a) {
+                    mouse.x = a.getX();
+                    mouse.y = a.getY();
+                } else if (e instanceof MouseDownEvent){
+                    mouseIsPressed = true;
+                } else if (e instanceof MouseUpEvent){
+                    mouseIsPressed = false;
+                }
             }
         }
-    }
+    });
     // endregion
 
     /**
@@ -572,7 +568,7 @@ public abstract class drawer {
      */
     public static abstract class ChangeManager {
         // region VARIABLES
-        protected final static double range = 30;
+        private final static double range = 30;
 
         public final static ArrayList<Changeable> instances = new ArrayList<Changeable>();
         public static Changeable currentInstance;

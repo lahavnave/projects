@@ -23,10 +23,9 @@ public class mathTheoryCheck extends drawer {
         Sketcher arm = new Sketcher(WIDTH * 0.5, HEIGHT * 0.5 + d + h / 2.0, l, r, -Math.PI / 2 + minAngle, -Math.PI / 2 - minAngle, minAngle);
         // endregion
 
-        while (!canvas.isClosed()){
+        mouseUpdater.start();
 
-            // region REFRESH MOUSE POSITIONS
-            refreshMouse();
+        while (!canvas.isClosed()){
 
             // translate the x and y values from screen position to a feasible input
             double mouseX = mouse.x - WIDTH * 0.5 + w / 2;
