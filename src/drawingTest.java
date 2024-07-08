@@ -4,7 +4,7 @@ import src.drawingHelper.drawer;
 // https://github.com/Krassnig/CodeDraw/blob/master/INTRODUCTION.md
 
 
-public class drawingExperiments extends drawer {
+public class drawingTest extends drawer {
     public static void main(String[] args) {
 
 
