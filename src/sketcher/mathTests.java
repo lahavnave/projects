@@ -7,12 +7,12 @@ public class mathTests extends drawer{
 
         mouseUpdater.start();
         Point[] points = new Point[]{
-                new Point(),
+                new Point(true),
                 new ChangeablePoint(75 , 125),
                 new ChangeablePoint(125, 75 ),
                 new ChangeablePoint(275, 75 ),
                 new ChangeablePoint(275, 75 ),
-                new Point()
+                new Point(true)
         };
 
         while (!canvas.isClosed()) {

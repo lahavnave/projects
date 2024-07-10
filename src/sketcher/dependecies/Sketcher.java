@@ -8,7 +8,7 @@ public class Sketcher extends drawer{
     public double l, r, a1, a2, minAngle;
 
     public Sketcher(double x, double y, double l, double r, double a1, double a2, double minAngle){
-        this.origin = new Point(x, y);
+        this.origin = new Point(x, y, true);
         this.l  = l ;
         this.r  = r ;
         this.a1 = a1;
@@ -17,14 +17,14 @@ public class Sketcher extends drawer{
     }
 
     public void fullDraw(){
-        Vector l1 = new Vector(origin, a1, l);
-        Vector l2 = new Vector(origin, a2, l);
+        Vector l1 = new Vector(origin, a1, l, true);
+        Vector l2 = new Vector(origin, a2, l, true);
 
         double d = Vector.getLength(l1.p2, l2.p2);
         double avgAngle = ((l1.getAngle() + l2.getAngle()) % (Math.PI * 2)) / 2;
 
-        Vector r1 = new Vector(l1.p2, avgAngle + Math.acos(d * 0.5 / r) - Math.PI / 2 * (l1.getAngle() > l2.getAngle() ? 1:-1), r);
-        Vector r2 = new Vector(l2.p2, avgAngle - Math.acos(d * 0.5 / r) + Math.PI / 2 * (l1.getAngle() > l2.getAngle() ? 1:-1), r);
+        Vector r1 = new Vector(l1.p2, avgAngle + Math.acos(d * 0.5 / r) - Math.PI / 2 * (l1.getAngle() > l2.getAngle() ? 1:-1), r, true);
+        Vector r2 = new Vector(l2.p2, avgAngle - Math.acos(d * 0.5 / r) + Math.PI / 2 * (l1.getAngle() > l2.getAngle() ? 1:-1), r, true);
         l1.draw();
         l2.draw();
         r1.draw();
@@ -34,13 +34,13 @@ public class Sketcher extends drawer{
     }
 
     public void drawEndPoint(){
-        Vector l1 = new Vector(origin, a1, l);
-        Vector l2 = new Vector(origin, a2, l);
+        Vector l1 = new Vector(origin, a1, l, true);
+        Vector l2 = new Vector(origin, a2, l, true);
 
         double d = Vector.getLength(l1.p2, l2.p2);
         double avgAngle = ((l1.getAngle() + l2.getAngle()) % (Math.PI * 2)) / 2;
 
-        Vector r2 = new Vector(l2.p2, avgAngle - Math.acos(d * 0.5 / r) + Math.PI / 2 * (l1.getAngle() > l2.getAngle() ? 1:-1), r);
+        Vector r2 = new Vector(l2.p2, avgAngle - Math.acos(d * 0.5 / r) + Math.PI / 2 * (l1.getAngle() > l2.getAngle() ? 1:-1), r, true);
 
         r2.p2.draw();
     }

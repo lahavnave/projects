@@ -15,18 +15,15 @@ import static src.drawingHelper.Colors.*;
 public abstract class drawer {
 
     // region VARIABLES
+    public final static ArrayList<drawable> allInstances = new ArrayList<drawable>();
+    public final static ArrayList<Changeable> ChangeableInstances = new ArrayList<Changeable>();
+
     public static final CodeDraw canvas = new CodeDraw(700, 700);
     public static final int WIDTH = canvas.getWidth();
     public static final int HEIGHT = canvas.getHeight();
     public static final Color backgroundColor = new Color(255, 255, 255, 75);
 
-    static {
-        setLineWidth(3);
-        canvas.getTextFormat().setTextOrigin(TextOrigin.CENTER);
-        canvas.getTextFormat().setBold(true);
-    }
-
-    public static final Point mouse = new Point();
+    public static final Point mouse = new Point(false);
     public static boolean mouseIsPressed = false;
     // endregion
 
@@ -37,9 +34,14 @@ public abstract class drawer {
     public static void setColor(int r, int g, int b, int a) { canvas.setColor(new Color(r, g, b, a)); }
     public static void setColor(Color color) { canvas.setColor(color); }
     public static void showChanges() {
-        canvas.show();
         setColor(backgroundColor);
         canvas.fillRectangle(0, 0, WIDTH, HEIGHT);
+
+        for (drawable d: drawer.allInstances)
+            if(d.visible)
+                d.draw();
+
+        canvas.show();
     }
 
     public static final Thread mouseUpdater = new Thread(() -> {
@@ -58,27 +60,41 @@ public abstract class drawer {
     });
     // endregion
 
+    static {
+        setLineWidth(3);
+        canvas.getTextFormat().setTextOrigin(TextOrigin.CENTER);
+        canvas.getTextFormat().setBold(true);
+    }
+
     /**
      * an object that can be drawn onto the canvas
      */
     public static abstract class drawable {
         // region VARIABLES
+        public boolean visible = true;
         public Color defaultColor = BLACK;
         public Color color        = BLACK;
         // endregion
 
-        abstract void draw();
+        public abstract void draw();
+
+        public drawable(boolean trackable){
+            if (trackable) drawer.allInstances.add(this);
+        }
     }
 
     public static class Point  extends drawable {
         public double x, y;
 
         // region INITIALIZING
-        public Point(double x, double y){
+        public Point(double x, double y, boolean trackable){
+            super(trackable);
             this.x = x;
             this.y = y;
         }
-        public Point(){}
+        public Point(boolean trackable){
+            super(trackable);
+        }
         // endregion
 
         public void draw(){
@@ -103,16 +119,16 @@ public abstract class drawer {
         // region BASIC OPERATION SHORTCUTS
         // region NUMBERS
         public Point minus(double n){
-            return new Point(x - n, y - n);
+            return new Point(x - n, y - n, false);
         }
         public Point plus(double n){
-            return new Point(x + n, y + n);
+            return new Point(x + n, y + n, false);
         }
         public Point times(double n){
-            return new Point(x * n, y * n);
+            return new Point(x * n, y * n, false);
         }
         public Point over(double n){
-            return new Point(x / n, y / n);
+            return new Point(x / n, y / n, false);
         }
 
         public void subtract(double n){
@@ -135,16 +151,16 @@ public abstract class drawer {
 
         // region POINTS
         public Point minus(Point p){
-            return new Point(x - p.x, y - p.y);
+            return new Point(x - p.x, y - p.y, false);
         }
         public Point plus (Point p){
-            return new Point(x + p.x, y + p.y);
+            return new Point(x + p.x, y + p.y, false);
         }
         public Point times(Point p){
-            return new Point(x * p.x, y * p.y);
+            return new Point(x * p.x, y * p.y, false);
         }
         public Point over (Point p){
-            return new Point(x / p.x, y / p.y);
+            return new Point(x / p.x, y / p.y, false);
         }
 
         public void subtract(Point p){
@@ -166,7 +182,7 @@ public abstract class drawer {
         // endregion
 
         public Point copy(){
-            return new Point(x, y);
+            return new Point(x, y, false);
         }
         public void copy(Point p){
             x = p.x;
@@ -182,21 +198,25 @@ public abstract class drawer {
         public Point p1, p2;
 
         // region INITIALIZING
-        public Vector(Point P1, Point P2){
+        public Vector(Point P1, Point P2, boolean trackable){
+            super(trackable);
             p1 = P1;
             p2 = P2;
         }
-        public Vector(double x1, double y1, double x2, double y2){
-            p1 = new Point(x1, y1);
-            p2 = new Point(x2, y2);
+        public Vector(double x1, double y1, double x2, double y2, boolean trackable){
+            super(trackable);
+            p1 = new Point(x1, y1, trackable);
+            p2 = new Point(x2, y2, trackable);
         }
-        public Vector(Point P1, double angle, double l){
+        public Vector(Point P1, double angle, double l, boolean trackable){
+            super(trackable);
             p1 = P1;
-            p2 = new Point(p1.x + l * Math.cos(angle), p1.y + l * Math.sin(angle));
+            p2 = new Point(p1.x + l * Math.cos(angle), p1.y + l * Math.sin(angle), trackable);
         }
-        public Vector(){
-            p1 = new Point();
-            p2 = new Point();
+        public Vector(boolean trackable){
+            super(trackable);
+            p1 = new Point(trackable);
+            p2 = new Point(trackable);
         }
 
         public void setByRadian(double x1, double y1, double angle, double l){
@@ -238,8 +258,8 @@ public abstract class drawer {
             draw();
 
             // the two points needed for the arrow head
-            Point newP1 = new Point();
-            Point newP2 = new Point();
+            Point newP1 = new Point(false);
+            Point newP2 = new Point(false);
 
             // region CALCULATING THE POINT CORDS
             newP1.x = p2.x + Math.sin(getAngle() - 0.75 * Math.PI) * getLength() / 6;
@@ -300,16 +320,16 @@ public abstract class drawer {
         // region BASIC OPERATION SHORTCUTS
         // region POINTS
         public Vector minus(Point p){
-            return new Vector(p1.minus(p), p1.minus(p));
+            return new Vector(p1.minus(p), p1.minus(p), false);
         }
         public Vector plus (Point p){
-            return new Vector(p1.plus(p), p1.plus(p));
+            return new Vector(p1.plus(p), p1.plus(p), false);
         }
         public Vector times(Point p){
-            return new Vector(p1.times(p), p1.times(p));
+            return new Vector(p1.times(p), p1.times(p), false);
         }
         public Vector over (Point p){
-            return new Vector(p1.over(p), p1.over(p));
+            return new Vector(p1.over(p), p1.over(p), false);
         }
 
         public void subtract(Point p) {
@@ -332,16 +352,16 @@ public abstract class drawer {
 
         // region VECTORS
         public Vector subtract(Vector v){
-            return new Vector(p1.minus(v.p1), p1.minus(v.p2));
+            return new Vector(p1.minus(v.p1), p1.minus(v.p2), false);
         }
         public Vector add     (Vector v){
-            return new Vector(p1.plus(v.p1), p1.plus(v.p2));
+            return new Vector(p1.plus(v.p1), p1.plus(v.p2), false);
         }
         public Vector multiply(Vector v){
-            return new Vector(p1.times(v.p1), p1.times(v.p2));
+            return new Vector(p1.times(v.p1), p1.times(v.p2), false);
         }
         public Vector divide  (Vector v){
-            return new Vector(p1.over(v.p1), p1.over(v.p2));
+            return new Vector(p1.over(v.p1), p1.over(v.p2), false);
         }
 
         public void subtractBy(Vector v) {
@@ -363,7 +383,7 @@ public abstract class drawer {
         // endregion
 
         public Vector copy(){
-            return new Vector(p1.copy(), p2.copy());
+            return new Vector(p1.copy(), p2.copy(), false);
         }
         public void copy(Vector v){
             p1.copy(v.p1);
@@ -382,13 +402,15 @@ public abstract class drawer {
         public Point center;
 
         // region INITIALIZING
-        public Circle(Point center, double r){
+        public Circle(Point center, double r, boolean trackable){
+            super(trackable);
             this.r = r;
             this.center = center;
         }
-        public Circle(double centerX, double centerY, double r){
+        public Circle(double centerX, double centerY, double r, boolean trackable){
+            super(trackable);
             this.r = r;
-            this.center = new Point(centerX, centerY);
+            this.center = new Point(centerX, centerY, trackable);
         }
         // endregion
 
@@ -433,7 +455,8 @@ public abstract class drawer {
          */
 
         // region INITIALIZING
-        public Spline(Vector[] directors){
+        public Spline(Vector[] directors, boolean trackable){
+            super(trackable);
             this.directors = new Point[directors.length * 2];
             for (int i = 0; i < directors.length; i++){
                 this.directors[i * 2] = directors[i].p1;
@@ -442,7 +465,8 @@ public abstract class drawer {
             type = splineType.vectorOriented;
             characteristicsMatrix = generateCharacteristicsMatrix(0.5);
         }
-        public Spline(Point[] directors){
+        public Spline(Point[] directors, boolean trackable){
+            super(trackable);
             this.directors = directors;
             type = splineType.pointOriented;
             characteristicsMatrix = generateCharacteristicsMatrix(0.5);
@@ -477,7 +501,7 @@ public abstract class drawer {
 
             if (type == splineType.vectorOriented){
                 for (int i = 0; i < directors.length; i += 2){
-                    new Vector(directors[i], directors[i + 1]).fancyDraw();
+                    new Vector(directors[i], directors[i + 1], false).fancyDraw();
                 }
             }
             if (type == splineType.pointOriented){
@@ -572,7 +596,7 @@ public abstract class drawer {
 
         public final static ArrayList<Changeable> instances = new ArrayList<Changeable>();
         public static Changeable currentInstance;
-        public static final Point startingPoint = new Point();
+        public static final Point startingPoint = new Point(false);
         // endregion
 
         private static int chooseClosestInstance(){
@@ -656,7 +680,7 @@ public abstract class drawer {
 
     public static class ChangeablePoint  extends Point  implements Changeable {
         public ChangeablePoint(double x, double y){
-            super(x, y);
+            super(x, y, true);
             ChangeManager.instances.add(this);
         }
 
@@ -676,24 +700,24 @@ public abstract class drawer {
     }
     public static class ChangeableVector extends Vector implements Changeable {
         public ChangeableVector(double x1, double y1, double x2, double y2){
-            super(new ChangeablePoint(x1, y1), new ChangeablePoint(x2, y2));
+            super(new ChangeablePoint(x1, y1), new ChangeablePoint(x2, y2), true);
             if (p1.getClass() == ChangeablePoint.class) ChangeManager.instances.add((ChangeablePoint) p1);
             if (p2.getClass() == ChangeablePoint.class) ChangeManager.instances.add((ChangeablePoint) p2);
             ChangeManager.instances.add(this);
         }
         public ChangeableVector(ChangeablePoint p1, ChangeablePoint p2){
-            super(p1, p2);
+            super(p1, p2, true);
             ChangeManager.instances.add(this);
         }
         public ChangeableVector(ChangeablePoint p1, double angle, double l){
-            super(p1, new ChangeablePoint(p1.x + l * Math.cos(angle), p1.y + l * Math.sin(angle)));
+            super(p1, new ChangeablePoint(p1.x + l * Math.cos(angle), p1.y + l * Math.sin(angle)), true);
             ChangeManager.instances.add(this);
         }
         public ChangeableVector(Point p1, Point p2){
-            super(p1, p2);
+            super(p1, p2, true);
         }
         public ChangeableVector(Point p1, double angle, double l){
-            super(p1, new Point(p1.x + l * Math.cos(angle), p1.y + l * Math.sin(angle)));
+            super(p1, new Point(p1.x + l * Math.cos(angle), p1.y + l * Math.sin(angle), true), true);
             ChangeManager.instances.add((Changeable) p2);
         }
 
@@ -712,15 +736,15 @@ public abstract class drawer {
     }
     public static class ChangeableCircle extends Circle implements Changeable {
         public ChangeableCircle(ChangeablePoint center, double r){
-            super(center, r);
+            super(center, r, true);
             ChangeManager.instances.add(this);
         }
         public ChangeableCircle(Point center, double r){
-            super(center, r);
+            super(center, r, true);
             ChangeManager.instances.add(this);
         }
         public ChangeableCircle(double centerX, double centerY, double r){
-            super(new ChangeablePoint(centerX, centerY), r);
+            super(new ChangeablePoint(centerX, centerY), r, true);
             ChangeManager.instances.add(this);
         }
 
@@ -739,7 +763,7 @@ public abstract class drawer {
     }
     public static class ChangeableSpline extends Spline implements Changeable {
         public ChangeableSpline(Vector[] directors){
-            super(directors);
+            super(directors, true);
             for (Vector v : directors){
                 if (v.getClass() != ChangeableVector.class){
                     return;
@@ -748,7 +772,7 @@ public abstract class drawer {
             ChangeManager.instances.add(this);
         }
         public ChangeableSpline(Point[] directors){
-            super(directors);
+            super(directors, true);
             for (Point p : directors){
                 if (p.getClass() != ChangeablePoint.class){
                     return;
@@ -799,34 +823,34 @@ public abstract class drawer {
 
         // region INITIALIZE
         public Button(Point center, double r) {
-            super(center, r);
+            super(center, r, true);
             buttons.add(this);
         }
         public Button(double centerX, double centerY, double r) {
-            super(centerX, centerY, r);
+            super(centerX, centerY, r, true);
             buttons.add(this);
         }
 
         public Button(Point center, double r, String text) {
-            super(center, r);
+            super(center, r, true);
             this.text = text;
             buttons.add(this);
         }
         public Button(double centerX, double centerY, double r, String text) {
-            super(centerX, centerY, r);
+            super(centerX, centerY, r, true);
             this.text = text;
             buttons.add(this);
         }
 
         public Button(Point center, double r, Color color, String text) {
-            super(center, r);
+            super(center, r, true);
             this.text = text;
             this.defaultColor = color;
             this.color = color;
             buttons.add(this);
         }
         public Button(double centerX, double centerY, double r, Color color, String text) {
-            super(centerX, centerY, r);
+            super(centerX, centerY, r, true);
             this.text = text;
             this.defaultColor = color;
             this.color = color;
@@ -1046,7 +1070,7 @@ public abstract class drawer {
 
             for (int row = 0; row < rows; row++){
                 for (int col = 0; col < cols; col++){
-                    values[row][col] = new Point(arr[row][col][0], arr[row][col][1]);
+                    values[row][col] = new Point(arr[row][col][0], arr[row][col][1], false);
                 }
             }
         }
@@ -1159,14 +1183,14 @@ public abstract class drawer {
         }
 
         public Point sumAll(){
-            Point sum = new Point(0, 0);
+            Point sum = new Point(0, 0, false);
             for (int row = 0; row < rows; row++) for (int col = 0; col < cols; col++) sum.add(values[row][col]);
             return sum;
         }
         public PointMatrix sumRows(){
             PointMatrix mat = new PointMatrix(1, cols);
             for(int col = 0; col < cols; col++){
-                mat.set(0, col, new Point(0, 0));
+                mat.set(0, col, new Point(0, 0, false));
                 for (int row = 0; row < rows; row++){
                     mat.get(0, col).add(get(row, col));
                 }
@@ -1176,7 +1200,7 @@ public abstract class drawer {
         public PointMatrix sumCols(){
             PointMatrix mat = new PointMatrix(rows, 1);
             for(int row = 0; row < rows; row++){
-                mat.set(row, 0, new Point(0, 0));
+                mat.set(row, 0, new Point(0, 0, false));
                 for (int col = 0; col < cols; col++){
                     mat.get(row, 0).add(get(row, col));
                 }
