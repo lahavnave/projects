@@ -1,6 +1,0 @@
-make mouse a separate class
-add track and un track methods
-change color handling system ?
-pretty up the spline code ?
-
-rethink: should the 'changeable' be a input variable ?
