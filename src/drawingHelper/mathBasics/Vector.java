@@ -74,16 +74,16 @@ public class Vector {
     // region BASIC OPERATION SHORTCUTS
     // region POINTS
     public Vector minus(Point p){
-        return new Vector(p1.minus(p), p1.minus(p));
+        return new Vector(p1.minus(p), p2.minus(p));
     }
     public Vector plus (Point p){
-        return new Vector(p1.plus(p), p1.plus(p));
+        return new Vector(p1.plus(p), p2.plus(p));
     }
     public Vector times(Point p){
-        return new Vector(p1.times(p), p1.times(p));
+        return new Vector(p1.times(p), p2.times(p));
     }
     public Vector over (Point p){
-        return new Vector(p1.over(p), p1.over(p));
+        return new Vector(p1.over(p), p2.over(p));
     }
 
     public void subtract(Point p) {
@@ -106,16 +106,16 @@ public class Vector {
 
     // region VECTORS
     public Vector subtract(Vector v){
-        return new Vector(p1.minus(v.p1), p1.minus(v.p2));
+        return new Vector(p1.minus(v.p1), p2.minus(v.p2));
     }
     public Vector add     (Vector v){
-        return new Vector(p1.plus(v.p1), p1.plus(v.p2));
+        return new Vector(p1.plus(v.p1), p2.plus(v.p2));
     }
     public Vector multiply(Vector v){
-        return new Vector(p1.times(v.p1), p1.times(v.p2));
+        return new Vector(p1.times(v.p1), p2.times(v.p2));
     }
     public Vector divide  (Vector v){
-        return new Vector(p1.over(v.p1), p1.over(v.p2));
+        return new Vector(p1.over(v.p1), p2.over(v.p2));
     }
 
     public void subtractBy(Vector v) {
